@@ -1,3 +1,6 @@
+
+** This repo was forked so I could change the android build system version to 27 (and match my react-native android build version). I was getting errors when I had mismatching build versions.
+
 # react-native-nfc-manager
 
 [![npm version](https://img.shields.io/npm/v/react-native-nfc-manager.svg?style=flat)](https://www.npmjs.com/package/react-native-nfc-manager)
