@@ -2,12 +2,18 @@
 #import "React/RCTBridge.h"
 #import "React/RCTConvert.h"
 #import "React/RCTEventDispatcher.h"
+#import "React/RCTLog.h"
 
 int isSupported() {
     bool result = NO;
     if (@available(iOS 11.0, *)) {
-        if (NFCNDEFReaderSession.readingAvailable) {
-            result = YES;
+        @try {
+            if (NFCNDEFReaderSession.readingAvailable) {
+                result = YES;
+            }
+        }
+        @catch (NSException *exception) {
+            RCTLogError(@"Exception thrown during NfcManager.isSupported: %@", exception);
         }
     }
     return result;
@@ -99,13 +105,17 @@ RCT_EXPORT_MODULE()
     return YES;
 }
 
-RCT_EXPORT_METHOD(isSupported: (nonnull RCTResponseSenderBlock)callback)
+RCT_EXPORT_METHOD(isSupported: (NSString *)tech callback:(nonnull RCTResponseSenderBlock)callback)
 {
     if (isSupported()) {
-        callback(@[[NSNull null], @YES]);
-    } else {
-        callback(@[[NSNull null], @NO]);
+        // iOS only supports Ndef starting from iOS 11.0 (on iPhone 7 onwards)
+        if ([tech isEqualToString:@""] || [tech isEqualToString:@"Ndef"]) {
+            callback(@[[NSNull null], @YES]);
+            return;
+        }
     }
+
+    callback(@[[NSNull null], @NO]);
 }
 
 RCT_EXPORT_METHOD(start: (nonnull RCTResponseSenderBlock)callback)
