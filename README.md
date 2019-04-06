@@ -137,13 +137,23 @@ Start to listen to *ANY* NFC tags.
 __Arguments__
 - `listener` - `function` - the callback when discovering NFC tags
 - `alertMessage` - `string` - (iOS) the message to display on iOS when the NFCScanning pops up
-- `invalidateAfterFirstRead` - `boolean` - (iOS) when set to true this will not have you prompt to click done after NFC Scan.
+- `options` - `object` - Object containing (iOS)invalidateAfterFirstRead, (Android)isReaderModeEnabled, (Android)readerModeFlags. Use `NfcAdapter` flags. **Reader mode can only be used in Android 19 or later**.
 
-__Examples__
+**Examples**
+
 ```js
-NfcManager.registerTagEvent(tag => {
+NfcManager.registerTagEvent(
+  tag => {
     console.log('Tag Discovered', tag);
-}, 'Hold your device over the tag', true)
+  },
+  'Hold your device over the tag',
+  {
+    invalidateAfterFirstRead: true,
+    isReaderModeEnabled: true,
+    readerModeFlags:
+      NfcAdapter.FLAG_READER_NFC_A | NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK,
+  },
+);
 ```
 
 ### unregisterTagEvent()
@@ -336,7 +346,7 @@ Make the tag become read-only.
 
 ## Generic NfcTech API [Android only]
 
-To use the these API, you first need to request the `NfcTech.Ndef` technology (see `requestTechnology`). Once you have the tech request, you can use the following methods:
+To use the these API, you first need to request specific NFC technology (see `requestTechnology`). Once you have the tech request, you can use the following methods:
 
 ### transceive(bytes) [Android only]
 Send raw data to a tag and receive the response. This API is compatible with following NfcTech: NfcA, NfcB, NfcF, NfcV, IsoDep and MifareUltralight.
@@ -347,6 +357,24 @@ Send raw data to a tag and receive the response. This API is compatible with fol
 
 __Arguments__
 - `bytes` - `array` - the raw data you want to send, which is an array of bytes
+
+### getMaxTransceiveLength() [Android only]
+Return the maximum number of bytes that can be sent. This API is compatible with following NfcTech: NfcA, NfcB, NfcF, NfcV, IsoDep and MifareUltralight.
+
+> This method returns a promise:
+> * if resolved, the resolved value will be the maximum number of bytes that can be sent to transceive.
+> * if rejected, it means either the request is cancelled, the operation fail or the operation is not supported in current tech handle.
+
+### setTimeout(timeout) [Android only]
+Set the transceive timeout in milliseconds. This API is compatible with following NfcTech: NfcA, NfcF, IsoDep, MifareClassic and MifareUltralight.
+
+> This method returns a promise:
+> * if resolved, it means the setTimeout operation is success.
+> * if rejected, it means either the request is cancelled, the operation fail or the operation is not supported in current tech handle.
+
+__Arguments__
+- `timeout` - `int` - the transceive timeout in milliseconds
+
 
 ## NfcTech.MifareClassic API [Android only]
 
@@ -555,6 +583,9 @@ If you want to only have your app support NFC devices then you have to change re
 
 
 ## Version history (from v0.1.0) 
+
+v1.2.0
+- support Android `readerMode` feature (limit the NFC controller to reader mode only)
 
 v1.1.0
 - support Mifare Ultralight 
